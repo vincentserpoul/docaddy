@@ -38,7 +38,7 @@ header / {
   # https://www.owasp.org/index.php/Content_Security_Policy
   # https://report-uri.io/home/generate
   # https://csp-evaluator.withgoogle.com/
-  Content-Security-Policy "default-src 'self'; object-src 'none'; font-src fonts.googleapis.com fonts.gstatic.com; block-all-mixed-content;"
+  Content-Security-Policy "default-src 'self'; object-src 'none'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com; block-all-mixed-content;"
 
   # https://scotthelme.co.uk/a-new-security-header-referrer-policy/
   Referrer-Policy "origin-when-cross-origin"
