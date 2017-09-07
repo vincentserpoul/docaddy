@@ -81,3 +81,10 @@ CMD ["-conf", "/etc/caddy/caddyfile"]
 
 
 # docker build ./ --rm -t vincentserpoul/docaddy -f ./Dockerfile
+# docker container stop caddy;docker container rm caddy;docker run -d \
+# -p 2020:2020 \
+# --name caddy \
+# --read-only \
+# --cap-drop all \
+# -v $(pwd)/build:/home/caddy:ro \
+# vincentserpoul/docaddy
