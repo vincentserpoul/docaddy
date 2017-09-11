@@ -1,7 +1,6 @@
 FROM golang:1.9.0-alpine
 
 ENV GOPATH /home/developer
-ENV CGO_ENABLED 0
 ENV GOOS linux
 ENV GOARCH=amd64
 
@@ -23,17 +22,20 @@ USER developer
 WORKDIR /home/developer
 
 # https://github.com/mholt/caddy/issues/1843
-RUN go get github.com/caddyserver/buildworker &&\
+# RUN go get -d github.com/mholt/caddy &&\
+#     cd /home/developer/src/github.com/mholt/caddy &&\
+#     git checkout ${CADDY_VERSION}
+
+# Buildworker has been renamed, so depend on master now
+RUN go get github.com/caddyserver/builds &&\
     go get -d github.com/mholt/caddy &&\
-    cd /home/developer/src/github.com/mholt/caddy &&\
-    git checkout ${CADDY_VERSION}
+    cd /home/developer/src/github.com/mholt/caddy
 
 # Note: I created these patches with...
 #   git diff --no-color --no-prefix
 #
 # Add one or more plugins.
 RUN sed -i "s/\/\/ This is where other plugins get plugged in (imported)/_ \"github.com\/BTBurke\/caddy-jwt\"\n    _ \"github.com\/caddyserver\/dnsproviders\/namecheap\"\n    _ \"github.com\/captncraig\/cors\"\n    _ \"github.com\/nicolasazrak\/caddy-cache\"\n    _ \"github.com\/tarent\/loginsrv\/caddy\"\n    _ \"github.com\/xuqingfeng\/caddy-rate-limit\"/g" /home/developer/src/github.com/mholt/caddy/caddy/caddymain/run.go
-RUN cat /home/developer/src/github.com/mholt/caddy/caddy/caddymain/run.go
 
 # https://github.com/niemeyer/gopkg/issues/50
 RUN git config --global http.https://gopkg.in.followRedirects true
@@ -44,6 +46,7 @@ RUN go get -d ./...
 # Build!
 RUN mkdir /home/developer/bin/
 WORKDIR /home/developer/src/github.com/mholt/caddy/caddy
+RUN go get -d ./...
 RUN go run build.go
 
 RUN cp /home/developer/src/github.com/mholt/caddy/caddy/caddy /home/developer/bin/
