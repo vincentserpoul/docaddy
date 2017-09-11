@@ -5,7 +5,7 @@ ENV CGO_ENABLED 0
 ENV GOOS linux
 ENV GOARCH=amd64
 
-ENV CADDY_VERSION=v0.10.7
+ENV CADDY_VERSION=v0.10.8
 
 RUN apk upgrade --no-cache --available && \
     apk add --no-cache \
