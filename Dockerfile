@@ -4,7 +4,7 @@ ENV GOPATH /home/developer
 ENV GOOS linux
 ENV GOARCH=amd64
 
-ENV CADDY_VERSION=v0.10.8
+ENV CADDY_VERSION=v0.10.9
 
 RUN apk upgrade --no-cache --available && \
     apk add --no-cache \
@@ -21,15 +21,11 @@ RUN apk upgrade --no-cache --available && \
 USER developer
 WORKDIR /home/developer
 
-# https://github.com/mholt/caddy/issues/1843
-# RUN go get -d github.com/mholt/caddy &&\
-#     cd /home/developer/src/github.com/mholt/caddy &&\
-#     git checkout ${CADDY_VERSION}
-
 # Buildworker has been renamed, so depend on master now
 RUN go get github.com/caddyserver/builds &&\
     go get -d github.com/mholt/caddy &&\
-    cd /home/developer/src/github.com/mholt/caddy
+    cd /home/developer/src/github.com/mholt/caddy &&\
+    git checkout ${CADDY_VERSION}
 
 # Note: I created these patches with...
 #   git diff --no-color --no-prefix
