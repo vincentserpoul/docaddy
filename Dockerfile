@@ -52,32 +52,27 @@ RUN strip --strip-all /home/developer/bin/caddy
 
 FROM alpine:3.6
 
-RUN apk upgrade --no-cache --available && \
-    apk add --no-cache \
-      ca-certificates \
-      git \
-      libressl \
-      openssh-client \
-    && adduser -Du 1000 caddy
+RUN sed -i -e 's/dl-cdn/dl-5/g' /etc/apk/repositories && apk add --no-cache su-exec libcap openssl
 
-RUN echo "hello world" > /home/caddy/index.html
+RUN mkdir -p /var/www && \
+    mkdir /.caddy && \
+    mkdir /.ssh && \
+    chown nobody:nobody /var/www /.caddy /.ssh
+RUN echo StrictHostKeyChecking no >> /.ssh/ssh_config
+
 COPY ./caddyfile /etc/caddy/
+COPY ./start.sh /
+RUN chmod +x ./start.sh
 
-RUN \
-    mkdir -p /var/www && \
-    chown caddy:caddy /var/www && \
-    :
+COPY --from=0 /home/developer/bin/caddy /usr/sbin/caddy
 
-VOLUME ["/etc/caddy"]
-VOLUME ["/var/www"]
+RUN /usr/sbin/setcap cap_net_bind_service=+ep /usr/sbin/caddy
 
-COPY --from=0 /home/developer/bin/caddy /usr/sbin/
 
-# Run as an unprivileged user.
-USER caddy
-ENTRYPOINT ["/usr/sbin/caddy"]
-CMD ["-conf", "/etc/caddy/caddyfile"]
+VOLUME ["/etc/caddy", "/.caddy", "/var/www"]
+EXPOSE 80 443 2015
 
+ENTRYPOINT ["/start.sh"]
 
 # docker build ./ --rm -t vincentserpoul/docaddy -f ./Dockerfile
 # docker container stop caddy;docker container rm caddy;docker run -d \
