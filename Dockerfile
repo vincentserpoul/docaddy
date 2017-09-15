@@ -6,7 +6,8 @@ ENV GOARCH=amd64
 
 ENV CADDY_VERSION=v0.10.9
 
-RUN apk upgrade --no-cache --available && \
+RUN sed -i -e 's/dl-cdn/dl-5/g' /etc/apk/repositories && \
+    apk upgrade --no-cache --available && \
     apk add --no-cache \
       bash \
       binutils \
@@ -52,7 +53,7 @@ RUN strip --strip-all /home/developer/bin/caddy
 
 FROM alpine:3.6
 
-RUN sed -i -e 's/dl-cdn/dl-5/g' /etc/apk/repositories && apk add --no-cache su-exec libcap openssl
+RUN sed -i -e 's/dl-cdn/dl-5/g' /etc/apk/repositories && apk add --no-cache su-exec libcap libressl
 
 RUN mkdir -p /var/www && \
     mkdir /.caddy && \
@@ -61,16 +62,15 @@ RUN mkdir -p /var/www && \
 RUN echo StrictHostKeyChecking no >> /.ssh/ssh_config
 
 COPY ./caddyfile /etc/caddy/
-COPY ./start.sh /
-RUN chmod +x ./start.sh
-
 COPY --from=0 /home/developer/bin/caddy /usr/sbin/caddy
-
 RUN /usr/sbin/setcap cap_net_bind_service=+ep /usr/sbin/caddy
 
 
 VOLUME ["/etc/caddy", "/.caddy", "/var/www"]
 EXPOSE 80 443 2015
+
+COPY ./start.sh /
+RUN chmod +x ./start.sh
 
 ENTRYPOINT ["/start.sh"]
 
