@@ -53,7 +53,8 @@ RUN strip --strip-all /home/developer/bin/caddy
 
 FROM alpine:3.6
 
-RUN sed -i -e 's/dl-cdn/dl-5/g' /etc/apk/repositories && apk add --no-cache su-exec libcap libressl
+RUN sed -i -e 's/dl-cdn/dl-5/g' /etc/apk/repositories && \
+    apk add --no-cache su-exec libcap libressl ca-certificates
 
 RUN mkdir -p /var/www && \
     mkdir /.caddy && \
@@ -69,12 +70,14 @@ RUN /usr/sbin/setcap cap_net_bind_service=+ep /usr/sbin/caddy
 VOLUME ["/etc/caddy", "/.caddy", "/var/www"]
 EXPOSE 80 443 2015
 
+ENV ENV_SYSTEM ""
+
 COPY ./start.sh /
 RUN chmod +x ./start.sh
 
 ENTRYPOINT ["/start.sh"]
 
-# docker build ./ --rm -t vincentserpoul/docaddy -f ./Dockerfile
+# docker build ./ --rm -t vincentserpoul/docaddy:v0.10.9 -f ./Dockerfile
 # docker container stop caddy;docker container rm caddy;docker run -d \
 # -p 2020:2020 \
 # --name caddy \
